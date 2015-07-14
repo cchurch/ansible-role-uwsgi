@@ -8,10 +8,11 @@ uwsgi_install: 'pkg'
 uwsgi_version: ''
 uwsgi_virtualenv: ''
 
+#uwsgi_use_upstart: no
 uwsgi_bin: ''
-uwsgi_vassal_path: '/etc/uwsgi'
 uwsgi_opts: '--master --die-on-term --emperor {{uwsgi_vassal_path|quote}}'
 
+uwsgi_vassal_path: ''
 uwsgi_vassals: []
 # - name: vassal name
 #   key: value

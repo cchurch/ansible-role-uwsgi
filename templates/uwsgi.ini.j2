@@ -1,4 +1,4 @@
 [uwsgi]
-{% for k,v in item.items %}
+{% for k,v in item.items() %}
 {{k}} = {{v}}
-{% endif %}
+{% endfor %}

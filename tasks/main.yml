@@ -3,6 +3,17 @@
 - name: initialize uwsgi variables
   set_fact:
     uwsgi_name: '{{uwsgi_name|mandatory}}'
+    uwsgi_service_name: '{{uwsgi_service_name|default(uwsgi_name,true)}}'
+
+- name: determine whether to use upstart to manage uwsgi service
+  set_fact:
+    uwsgi_use_upstart: '{{(uwsgi_install != "pkg")|bool}}'
+  when: uwsgi_use_upstart is not defined
+
+- name: update service name based on installation method and upstart usage
+  set_fact:
+    uwsgi_service_name: '{{uwsgi_service_names[uwsgi_install][ansible_pkg_mgr]}}'
+  when: 'not uwsgi_use_upstart|bool and uwsgi_service_names[uwsgi_install][ansible_pkg_mgr] is defined'
 
 - name: install uwsgi via system package manager
   action:
@@ -27,14 +38,14 @@
     virtualenv: '{{uwsgi_virtualenv|default(omit,true)}}'
   when: 'uwsgi_install == "pip"'
 
-- name: set uwsgi binary path in virtualenv
+- name: set uwsgi binary path when using virtualenv
   set_fact:
     uwsgi_bin: '{{uwsgi_virtualenv}}/bin/uwsgi'
-  when: 'uwsgi_install == "pip" and uwsgi_virtualenv and not uwsgi_bin'
+  when: 'uwsgi_use_upstart and uwsgi_install == "pip" and uwsgi_virtualenv and not uwsgi_bin'
 
 - name: find uwsgi binary path if not provided
   command: which uwsgi
-  when: not uwsgi_bin
+  when: uwsgi_use_upstart and not uwsgi_bin
   changed_when: false
   failed_when: not uwsgi_bin_which.stdout
   register: uwsgi_bin_which
@@ -42,36 +53,41 @@
 - name: update uwsgi binary path
   set_fact:
     uwsgi_bin: '{{uwsgi_bin_which.stdout}}'
-  when: not uwsgi_bin
+  when: uwsgi_use_upstart and not uwsgi_bin
 
 - name: install upstart package for running uwsgi
   action:
     module: '{{ansible_pkg_mgr}}'
     name: '{{uwsgi_upstart_package[ansible_pkg_mgr]}}'
     state: present
-  when: 'uwsgi_upstart_package[ansible_pkg_mgr] is defined'
+  when: 'uwsgi_use_upstart and uwsgi_upstart_package[ansible_pkg_mgr] is defined'
 
 - name: add upstart uwsgi configuration
   template:
     src: uwsgi.conf.j2
     dest: '/etc/init/{{uwsgi_name}}.conf'
+  when: uwsgi_use_upstart
   notify:
     - restart uwsgi
+
+- name: set default vassal path based on installation method
+  set_fact:
+    uwsgi_vassal_path: '{{uwsgi_vassal_paths[uwsgi_install][ansible_pkg_mgr]}}'
+  when: 'not uwsgi_vassal_path and uwsgi_vassal_paths[uwsgi_install][ansible_pkg_mgr] is defined'
 
 - name: make sure uwsgi vassal path exists
   file:
     path: '{{uwsgi_vassal_path}}'
     state: directory
-  when: uwsgi_vassal_path
+  when: (uwsgi_vassal_path and uwsgi_use_upstart) or uwsgi_vassals
 
 - name: configure any vassals defined
   template:
     src: uwsgi.ini.j2
-    dest: '{{uwsgi_vassal_path}}/{{item.name|mandatory}}.ini'
-  when: uwsgi_vassal_path
+    dest: '{{uwsgi_vassal_path|mandatory}}/{{item.name|mandatory}}.ini'
   with_items: uwsgi_vassals
 
 - name: start the uwsgi service
   service:
-    name: '{{uwsgi_name}}'
+    name: '{{uwsgi_service_name|mandatory}}'
     state: started

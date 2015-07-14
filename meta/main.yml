@@ -2,7 +2,7 @@
 
 galaxy_info:
   author: Chris Church
-  description: Install uWSGI to run via Upstart.
+  description: Install uWSGI in emperor mode and configure vassals.
   company: "Nine More Minutes, Inc."
   license: BSD
   min_ansible_version: 1.8
