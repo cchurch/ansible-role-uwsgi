@@ -1,0 +1,24 @@
+---
+
+- hosts: all
+  vars:
+    uwsgi_name: 'uwsgi'
+    uwsgi_vassal_path: '/etc/uwsgi'
+    uwsgi_vassals:
+      - name: test
+  pre_tasks:
+    - name: stop uwsgi service
+      service:
+        name: '{{uwsgi_name}}'
+        state: stopped
+      ignore_errors: true
+    - name: remove vassal path
+      file:
+        path: '{{uwsgi_vassal_path}}'
+        state: absent
+    - name: remove upstart config
+      file:
+        path: '/etc/init/{{uwsgi_name}}.conf'
+        state: absent
+  roles:
+    - role: cchurch.uwsgi

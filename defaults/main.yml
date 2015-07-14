@@ -1,0 +1,18 @@
+---
+
+uwsgi_name: uwsgi
+uwsgi_description: 'uWSGI Server'
+
+# 'pkg', 'pip' or ''
+uwsgi_install: 'pkg'
+uwsgi_version: ''
+uwsgi_virtualenv: ''
+
+uwsgi_bin: ''
+uwsgi_vassal_path: '/etc/uwsgi'
+uwsgi_opts: '--master --die-on-term --emperor {{uwsgi_vassal_path|quote}}'
+
+uwsgi_vassals: []
+# - name: vassal name
+#   key: value
+#   ...

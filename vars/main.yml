@@ -1,0 +1,13 @@
+---
+
+uwsgi_packages:
+  yum:
+    - uwsgi
+    - uwsgi-plugin-python
+  apt:
+    - uwsgi-emperor
+    - uwsgi-plugin-python
+
+uwsgi_upstart_packages:
+  yum: upstart
+  apt: upstart

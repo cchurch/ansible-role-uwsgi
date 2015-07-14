@@ -1,0 +1,77 @@
+---
+
+- name: initialize uwsgi variables
+  set_fact:
+    uwsgi_name: '{{uwsgi_name|mandatory}}'
+
+- name: install uwsgi via system package manager
+  action:
+    module: '{{ansible_pkg_mgr}}'
+    name: '{{item}}'
+    state: 'present'
+  with_items: '{{uwsgi_packages[ansible_pkg_mgr]|default([])}}'
+  when: 'uwsgi_install == "pkg" and not uwsgi_version'
+
+- name: install specific version of uwsgi via system package manager
+  action:
+    module: '{{ansible_pkg_mgr}}'
+    name: '{{item}}=={{uwsgi_version}}'
+    state: present
+  with_items: '{{uwsgi_packages[ansible_pkg_mgr]|default([])}}'
+  when: 'uwsgi_install == "pkg" and uwsgi_version'
+
+- name: install uwsgi via pip
+  pip:
+    name: 'uWSGI'
+    version: '{{uwsgi_version|default(omit,true)}}'
+    virtualenv: '{{uwsgi_virtualenv|default(omit,true)}}'
+  when: 'uwsgi_install == "pip"'
+
+- name: set uwsgi binary path in virtualenv
+  set_fact:
+    uwsgi_bin: '{{uwsgi_virtualenv}}/bin/uwsgi'
+  when: 'uwsgi_install == "pip" and uwsgi_virtualenv and not uwsgi_bin'
+
+- name: find uwsgi binary path if not provided
+  command: which uwsgi
+  when: not uwsgi_bin
+  changed_when: false
+  failed_when: not uwsgi_bin_which.stdout
+  register: uwsgi_bin_which
+
+- name: update uwsgi binary path
+  set_fact:
+    uwsgi_bin: '{{uwsgi_bin_which.stdout}}'
+  when: not uwsgi_bin
+
+- name: install upstart package for running uwsgi
+  action:
+    module: '{{ansible_pkg_mgr}}'
+    name: '{{uwsgi_upstart_package[ansible_pkg_mgr]}}'
+    state: present
+  when: 'uwsgi_upstart_package[ansible_pkg_mgr] is defined'
+
+- name: add upstart uwsgi configuration
+  template:
+    src: uwsgi.conf.j2
+    dest: '/etc/init/{{uwsgi_name}}.conf'
+  notify:
+    - restart uwsgi
+
+- name: make sure uwsgi vassal path exists
+  file:
+    path: '{{uwsgi_vassal_path}}'
+    state: directory
+  when: uwsgi_vassal_path
+
+- name: configure any vassals defined
+  template:
+    src: uwsgi.ini.j2
+    dest: '{{uwsgi_vassal_path}}/{{item.name|mandatory}}.ini'
+  when: uwsgi_vassal_path
+  with_items: uwsgi_vassals
+
+- name: start the uwsgi service
+  service:
+    name: '{{uwsgi_name}}'
+    state: started

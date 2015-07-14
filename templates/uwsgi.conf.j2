@@ -1,0 +1,9 @@
+# {{ansible_managed}}
+
+description "{{uwsgi_description|default('')}}"
+start on runlevel [2345]
+stop on runlevel [06]
+
+respawn
+
+exec {{uwsgi_bin|quote}} {{uwsgi_opts|default('')}}
