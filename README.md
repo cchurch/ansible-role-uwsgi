@@ -1,5 +1,5 @@
 [![Build Status](http://img.shields.io/travis/cchurch/ansible-role-uwsgi.svg)](https://travis-ci.org/cchurch/ansible-role-uwsgi)
-[![Galaxy](http://img.shields.io/badge/galaxy-cchurch.uwsgi-blue.svg)](https://galaxy.ansible.com/list#/roles/)
+[![Galaxy](http://img.shields.io/badge/galaxy-cchurch.uwsgi-blue.svg)](https://galaxy.ansible.com/list#/roles/4388)
 
 uWSGI
 =====
