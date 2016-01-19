@@ -17,3 +17,6 @@ uwsgi_vassals: []
 # - name: vassal name
 #   key: value
 #   ...
+
+uwsgi_emperor_tyrant: yes
+uwsgi_emperor_conf: ''

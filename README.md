@@ -37,6 +37,11 @@ The following variables may be defined to customize this role:
   Must be a list of hashes, with each hash having at least a `name` key to
   specify file name.  All keys and values are written to the INI file under
   the `[uwsgi]` section.  Default is `[]`.
+- `uwsgi_emperor_tyrant`: Run emperor in tyrant mode.  Each vassal configuration
+  file will be owned by the uid/gid specified in the vassal options and run as
+  that user instead of the emperor user.  Default is `yes` (new in 0.2).
+- `uwsgi_emperor_conf`: Path to uWSGI emperor configuration file.  Default is
+  determined by the installation method (new in 0.2).
 
 Example Playbook
 ----------------
@@ -57,8 +62,8 @@ vassal running a Django site:
               env: DJANGO_SETTINGS_MODULE=example.settings
               processes: 4
               socket: 127.0.0.1:8000
-              uid: example_user
-              gid: example_group
+              uid: example
+              gid: example
 
 License
 -------

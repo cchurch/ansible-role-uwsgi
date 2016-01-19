@@ -12,6 +12,11 @@ uwsgi_upstart_packages:
   yum: upstart
   apt: upstart
 
+uwsgi_emperor_confs:
+  pkg:
+    yum: /etc/uwsgi.ini
+    apt: /etc/uwsgi-emperor/emperor.ini
+
 uwsgi_vassal_paths:
   pkg:
     yum: /etc/uwsgi.d

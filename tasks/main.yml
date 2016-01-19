@@ -64,9 +64,26 @@
 
 - name: add upstart uwsgi configuration
   template:
-    src: uwsgi.conf.j2
+    src: uwsgi-upstart.conf.j2
     dest: '/etc/init/{{uwsgi_name}}.conf'
   when: uwsgi_use_upstart
+  notify:
+    - restart uwsgi
+
+- name: set default emperor conf based on installation method
+  set_fact:
+    uwsgi_emperor_conf: '{{uwsgi_emperor_confs[uwsgi_install][ansible_pkg_mgr]}}'
+  when: 'not uwsgi_emperor_conf and uwsgi_emperor_confs[uwsgi_install][ansible_pkg_mgr] is defined'
+
+- name: configure whether uwsgi emperor runs in tyrant mode
+  lineinfile:
+    dest: '{{uwsgi_emperor_conf}}'
+    regexp: '^#*?\s*?{{item.name}}\s*?='
+    line: "{{item.name}} = {{item.value}}"
+  with_items:
+    - {name: emperor-tyrant, value: '{{uwsgi_emperor_tyrant|bool}}'}
+    - {name: cap, value: 'setgid,setuid'}
+  when: uwsgi_emperor_conf
   notify:
     - restart uwsgi
 
@@ -83,8 +100,10 @@
 
 - name: configure any vassals defined
   template:
-    src: uwsgi.ini.j2
+    src: uwsgi-vassal.ini.j2
     dest: '{{uwsgi_vassal_path|mandatory}}/{{item.name|mandatory}}.ini'
+    owner: '{% if uwsgi_emperor_tyrant %}{{item.uid|default(omit)}}{% else %}omit{% endif %}'
+    group: '{% if uwsgi_emperor_tyrant %}{{item.gid|default(omit)}}{% else %}omit{% endif %}'
   with_items: uwsgi_vassals
 
 - name: start the uwsgi service
