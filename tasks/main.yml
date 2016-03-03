@@ -83,7 +83,7 @@
   with_items:
     - {name: emperor-tyrant, value: '{{uwsgi_emperor_tyrant|bool}}'}
     - {name: cap, value: 'setgid,setuid'}
-  when: uwsgi_emperor_conf
+  when: uwsgi_emperor_conf is defined and uwsgi_emperor_conf
   notify:
     - restart uwsgi
 

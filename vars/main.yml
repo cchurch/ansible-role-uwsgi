@@ -7,6 +7,8 @@ uwsgi_packages:
   apt:
     - uwsgi-emperor
     - uwsgi-plugin-python
+  pip:
+    - uwsgi
 
 uwsgi_upstart_packages:
   yum: upstart
@@ -19,6 +21,9 @@ uwsgi_emperor_confs:
 
 uwsgi_vassal_paths:
   pkg:
+    yum: /etc/uwsgi.d
+    apt: /etc/uwsgi-emperor/vassals
+  pip:
     yum: /etc/uwsgi.d
     apt: /etc/uwsgi-emperor/vassals
 
