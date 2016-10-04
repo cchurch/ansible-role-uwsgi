@@ -1,11 +1,21 @@
 ---
 
+sudo: required
 language: python
 python: "2.7"
+env:
+  matrix:
+    #- DOCKER_FILE=Dockerfile.centos_6
+    - DOCKER_FILE=Dockerfile.ubuntu_14.04
+services:
+  - docker
+
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -qq python-apt
 install:
-  - pip install -r requirements.txt
+  - pip install ansible
+  #- pip install -r requirements.txt
+  - "{ echo '[defaults]'; echo 'roles_path = ../'; } >> ansible.cfg"
 script:
-  - ansible-playbook -i localhost, -c local -vv test/main.yml
+  - ansible-playbook -i localhost, test/main.yml --syntax-check
+  - test/docker/run.sh ansible-playbook -i localhost, test/main.yml --connection=local --sudo
