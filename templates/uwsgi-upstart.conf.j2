@@ -6,4 +6,4 @@ stop on runlevel [06]
 
 respawn
 
-exec {{_uwsgi_bin|quote}} {{uwsgi_opts|default('')}}
+exec {{_uwsgi_bin|quote}} {{uwsgi_opts}}

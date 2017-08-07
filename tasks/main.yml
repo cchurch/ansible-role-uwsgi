@@ -30,7 +30,7 @@
 - name: install uwsgi packages via system package manager
   action:
     module: '{{ansible_pkg_mgr}}'
-    name: '{{item.name|default(item)}}{{item.version|default(false)|ternary("==" + item.version|default(""),"")}}'
+    name: '{{item}}'
     state: 'present'
   with_items: '{{uwsgi_os_packages}}'
   when: uwsgi_install != ""
@@ -38,7 +38,7 @@
 - name: install uwsgi packages via pip
   pip:
     name: '{{item.name|default(item)}}'
-    version: '{{item.version|default(omit,true)}}'
+    version: '{{item.version|default(uwsgi_version,true)|default(omit,true)}}'
     virtualenv: '{{uwsgi_virtualenv|default(omit,true)}}'
   with_items: '{{uwsgi_pip_packages}}'
   when: uwsgi_install == "pip"

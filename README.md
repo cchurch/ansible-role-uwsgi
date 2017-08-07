@@ -1,47 +1,101 @@
 [![Build Status](http://img.shields.io/travis/cchurch/ansible-role-uwsgi.svg)](https://travis-ci.org/cchurch/ansible-role-uwsgi)
-[![Galaxy](http://img.shields.io/badge/galaxy-cchurch.uwsgi-blue.svg)](https://galaxy.ansible.com/list#/roles/4388)
+[![Galaxy](http://img.shields.io/badge/galaxy-cchurch.uwsgi-blue.svg)](https://galaxy.ansible.com/cchurch/uwsgi/)
 
 uWSGI
 =====
 
-Install uWSGI in emperor mode and configure vassals.
+Install uWSGI in emperor mode and configure vassals. Requires Ansible 2.1 or
+later.
 
 Role Variables
 --------------
 
-The following variables may be defined to customize this role:
+**NOTE: Some variable names have changed since 0.2.x versions!**
 
-- `uwsgi_name`: Name of uWSGI Upstart service, default is `uwsgi`, required.
-- `uwsgi_description`: Description for uWSGI Upstart service, default is
-  `uWSGI Server`.
-- `uwsgi_service_name`: Name of uWSGI service, default is `uwsgi` unless an OS
-  package is installed that defines an alternate service name.
-- `uwsgi_use_upstart`: Boolean indicating whether to use Upstart to create and
-  manage uWSGI service.  Undefined by default, will be set to false if an OS
-  package is installed that already provides an init script, otherwise true.
-- `uwsgi_install`: Method to use to install uWSGI, can be `pkg` (default) to
-  use system package manager or `pip` to install via pip.  Any other value
-  assumes uWSGI is installed via other means.
-- `uwsgi_version`: When specified, install a specific version of uWSGI.
-- `uwsgi_virtualenv`: When specific and `uwsgi_install` == `pip`, installs
-  uWSGI into the specific virtualenv.
-- `uwsgi_bin`: Path to uWSGI binary to use for Upstart, will be determined
-  automatically if not specified.
-- `uwsgi_vassal_path`: Path for uWSGI Emperor to look for vassal configuration
-  files, default is `/etc/uwsgi` unless installed from an OS package, in
-  which case an OS-specific default will be used.
-- `uwsgi_opts`: Command line options to be used when running uWSGI via
-  Upstart.  Defaults to running emperor in master mode:
-  `--master --die-on-term --emperor {{uwsgi_vassal_path|quote}}`.
+The following variables are typically defined to customize this role:
+
+- `uwsgi_install`: Method to use to install uWSGI; can be `"pkg"` (default) to
+  use system package manager or `"pip"` to install via pip. Any other value
+  assumes uWSGI is installed by other means.
+- `uwsgi_version`: When `uwsgi_install == "pip"`, specify a version of uWSGI to
+  install. Default is to install the latest version available.
+- `uwsgi_virtualenv`: When `uwsgi_install == "pip"`, installs uWSGI into the
+  specified virtualenv path.
 - `uwsgi_vassals`: Create INI configuration files for any vassals specified.
   Must be a list of hashes, with each hash having at least a `name` key to
-  specify file name.  All keys and values are written to the INI file under
-  the `[uwsgi]` section.  Default is `[]`.
+  specify file name. All keys and values are written to the INI file under the
+  `[uwsgi]` section. Default is `[]`.
+- `uwsgi_vassals_to_remove`: List of vassal names to remove; default is `[]`.
+
+The following variables may be used to customize the configuration and paths
+used for the uWSGI emperor:
+
 - `uwsgi_emperor_tyrant`: Run emperor in tyrant mode.  Each vassal configuration
   file will be owned by the uid/gid specified in the vassal options and run as
-  that user instead of the emperor user.  Default is `yes` (new in 0.2).
-- `uwsgi_emperor_conf`: Path to uWSGI emperor configuration file.  Default is
-  determined by the installation method (new in 0.2).
+  that user instead of the emperor user.  Default is `true`.
+- `uwsgi_conf_template`: Local template to use for generating the uWSGI emperor
+  configuration. Default is set from `uwsgi_default_conf_templates[ansible_pkg_mgr]`,
+  which evaluates to `"uwsgi.ini.j2"` on EL distributions and `"emperor.ini.j2"`
+  on Ubuntu distributions.
+- `uwsgi_conf_path`: Path to uWSGI emperor configuration file. Default is set
+  from `uwsgi_default_conf_paths[ansible_pkg_mgr]`, which evaluates to
+  `"/etc/uwsgi.ini"` on EL distributions and `"/etc/uwsgi-emperor/emperor.ini"`
+  on Ubuntu distributions.
+- `uwsgi_conf_force`: Whether to force overwriting the uWSGI emperor
+  configuration file. Default is `false` to only create the file if it doesn't
+  already exist.
+- `uwsgi_vassal_path`: Path for uWSGI emperor to look for vassal configuration
+  files. Default is set from `uwsgi_default_vassal_paths[ansible_pkg_mgr]`,
+  which evaluates to `"/etc/uwsgi.d"` on EL distributions and
+  `"/etc/uwsgi-emperor/vassals"` on Ubuntu distributions.
+
+The following variables may be used to customize the packages installed to
+support uWSGI:
+
+- `uwsgi_os_packages`: List of system packages to install to support uWSGI.
+  Default is set from `uwsgi_default_os_packages[uwsgi_install][ansible_pkg_mgr]`,
+  which will install system packages when `uwsgi_install == "pkg"` and Python
+  development dependences when `uwsgi_install == "pip"`.
+- `uwsgi_pip_packages`: List of pip packages to install to support uWSGI when
+  `uwsgi_install == "pip"`. Default is set from `uwsgi_default_pip_packages`,
+  which evaluates to `["uwsgi"]`.
+
+The following variables may be used to customize the service configuration when
+uWSGI is not installed via the system package manager and managed via upstart or
+systemd:
+
+- `uwsgi_service_name`: Name of uWSGI service. Default is set from
+  `uwsgi_default_service_names[ansible_pkg_mgr]`, which evaluates to `"uwsgi"`
+  for EL distributions and `"uwsgi-emperor"` for Ubuntu distributions.
+- `uwsgi_bin`: Path to uWSGI binary to use for upstart or systemd configuration;
+  will be determined automatically if not specified.
+- `uwsgi_opts`: Command line options to be used when running uWSGI via
+  upstart or systemd; defaults to running using the options specified in the
+  uWSGI config file: `"--die-on-term --ini {{uwsgi_conf_path|quote}}"`.
+- `uwsgi_use_upstart`: Boolean indicating whether to use upstart to create and
+  manage the uWSGI service. It is undefined by default, and will only be enabled
+  when uWSGI is not installed via the system package manager on distributions
+  other than EL 7. It can be set to `false` to explicitly disable using upstart
+  to manage the uWSGI service.
+- `uwsgi_upstart_packages`: List of system packages to install to support
+  running uWSGI via upstart. Default is set from
+  `uwsgi_default_upstart_packages[ansible_pkg_mgr]`, which simply installs the
+  `upstart` package.
+- `uwsgi_upstart_description`: Description for uWSGI upstart service, default is
+  `"uWSGI Server"`.
+- `uwsgi_upstart_template`: Local template to use for generating the upstart
+  uWSGI configuration; default is `"uwsgi-upstart.conf.j2"`.
+- `uwsgi_upstart_path`: Path to install upstart uWSGI configuration; default is
+  `"/etc/init/{{_uwsgi_service_name}}.conf"`.
+- `uwsgi_use_systemd`: Boolean indicating whether to use systemd to create and
+  manage the uWSGI service. It is undefined by default, and will only be enabled
+  when uWSGI is not installed via the system package manager on EL 7
+  distributions. It can be set to `false` to explicitly disable using systemd to
+  manage the uWSGI service.
+- `uwsgi_systemd_template`: Local template to use for generating the systemd
+  uWSGI service; default is `"uwsgi.service.j2"`.
+- `uwsgi_systemd_path`: Path to install system uWSGI server; default is
+  `"/etc/systemd/system/{{_uwsgi_service_name}}.service"`.
 
 Example Playbook
 ----------------

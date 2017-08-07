@@ -39,7 +39,7 @@
   include: test_cleanup.yml
   tags: [virtualenv, virtualenv-cleanup]
 
-- name: test installation using virtualenv and custom service name and paths
+- name: test installation using virtualenv with custom service name and paths
   hosts: containers
   gather_facts: false
   tags: [virtualenv]
@@ -47,6 +47,7 @@
     virtualenv_path: '/var/lib/uwsgi_venv'
     uwsgi_service_name: uwsgi_venv
     uwsgi_install: pip
+    uwsgi_version: '2.0.14'
     uwsgi_virtualenv: '{{virtualenv_path}}'
     uwsgi_conf_path: '{{virtualenv_path}}/etc/uwsgi.ini'
     uwsgi_vassal_path: '{{virtualenv_path}}/etc/uwsgi_vassals'

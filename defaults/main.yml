@@ -4,6 +4,7 @@ uwsgi_service_name: ''
 
 # 'pkg', 'pip' or ''
 uwsgi_install: 'pkg'
+#uwsgi_version: ''
 uwsgi_virtualenv: ''
 
 uwsgi_os_packages: '{{(uwsgi_default_os_packages[uwsgi_install]|default({}))[ansible_pkg_mgr]|default([])}}'
@@ -20,7 +21,7 @@ uwsgi_systemd_template: 'uwsgi.service.j2'
 uwsgi_systemd_path: '/etc/systemd/system/{{_uwsgi_service_name}}.service'
 
 uwsgi_bin: ''
-uwsgi_opts: '--die-on-term --emperor {{uwsgi_vassal_path|quote}}'
+uwsgi_opts: '--die-on-term --ini {{uwsgi_conf_path|quote}}'
 
 uwsgi_emperor_tyrant: true
 
