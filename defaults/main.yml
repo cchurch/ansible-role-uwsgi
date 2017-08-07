@@ -12,6 +12,12 @@ uwsgi_pip_packages: '{{uwsgi_default_pip_packages|default([])}}'
 #uwsgi_use_upstart: no
 uwsgi_upstart_packages: '{{uwsgi_default_upstart_packages[ansible_pkg_mgr]|default([])}}'
 uwsgi_upstart_description: 'uWSGI Server'
+uwsgi_upstart_template: 'uwsgi-upstart.conf.j2'
+uwsgi_upstart_path: '/etc/init/{{_uwsgi_service_name}}.conf'
+
+#uwsgi_use_systemd: no
+uwsgi_systemd_template: 'uwsgi.service.j2'
+uwsgi_systemd_path: '/etc/systemd/system/{{_uwsgi_service_name}}.service'
 
 uwsgi_bin: ''
 uwsgi_opts: '--die-on-term --emperor {{uwsgi_vassal_path|quote}}'

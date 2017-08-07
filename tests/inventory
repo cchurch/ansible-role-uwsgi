@@ -2,8 +2,8 @@
 localhost
 
 [containers]
-uwsgi_centos6 image="centos:6"
-uwsgi_centos7 image="centos:7"
+uwsgi_centos6 image="chrismeyers/centos6"
+uwsgi_centos7 image="chrismeyers/centos7"
 uwsgi_ubuntu14 image="ubuntu:trusty"
 uwsgi_ubuntu16 image="ubuntu:xenial"
 

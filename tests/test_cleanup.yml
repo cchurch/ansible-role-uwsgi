@@ -24,7 +24,7 @@
         name: '{{item}}'
         state: absent
         purge: '{{(ansible_pkg_mgr == "apt")|ternary(true,omit)}}'
-      when: item != "which"
+      when: item != "which" and inventory_hostname != "uwsgi_ubuntu14"
       with_items: '{{uwsgi_default_upstart_packages[ansible_pkg_mgr]}}'
     - name: remove uwsgi pip packages
       pip:
@@ -32,6 +32,7 @@
         version: '{{item.version|default(omit,true)}}'
         state: absent
       with_items: '{{uwsgi_default_pip_packages}}'
+      ignore_errors: true
     - name: remove configs and vassals
       file:
         path: '{{item}}'
@@ -41,3 +42,5 @@
         - '{{uwsgi_default_vassal_paths[ansible_pkg_mgr]}}'
         - '/etc/uwsgi-emperor/'
         - '/etc/init/{{uwsgi_default_service_names[ansible_pkg_mgr]}}.conf'
+        - '/etc/init/uwsgi_venv.conf'
+        - '/var/lib/uwsgi_venv'
