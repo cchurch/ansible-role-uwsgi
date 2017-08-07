@@ -2,111 +2,114 @@
 
 - name: initialize uwsgi variables
   set_fact:
-    uwsgi_name: '{{uwsgi_name|mandatory}}'
-    uwsgi_service_name: '{{uwsgi_service_name|default(uwsgi_name,true)}}'
+    _uwsgi_service_name: '{{uwsgi_service_name|default(uwsgi_default_service_names[ansible_pkg_mgr]|default(""),true)}}'
+    _uwsgi_use_upstart: '{{uwsgi_use_upstart|default(uwsgi_install != "pkg")|bool}}'
+    _uwsgi_bin: '{{uwsgi_bin|default("",true)}}'
 
-- name: determine whether to use upstart to manage uwsgi service
-  set_fact:
-    uwsgi_use_upstart: '{{(uwsgi_install != "pkg")|bool}}'
-  when: uwsgi_use_upstart is not defined
+- name: check that required variables have been set
+  assert:
+    that:
+      - _uwsgi_service_name != ""
+      - uwsgi_conf_path != ""
+      - uwsgi_vassal_path != ""
+    msg: one or more required variables are not defined
 
-- name: update service name based on installation method and upstart usage
-  set_fact:
-    uwsgi_service_name: '{{uwsgi_service_names[uwsgi_install][ansible_pkg_mgr]}}'
-  when: 'not uwsgi_use_upstart|bool and uwsgi_service_names[uwsgi_install][ansible_pkg_mgr] is defined'
+- name: install uwsgi packages via system package manager
+  action:
+    module: '{{ansible_pkg_mgr}}'
+    name: '{{item.name|default(item)}}{{item.version|default(false)|ternary("==" + item.version|default(""),"")}}'
+    state: 'present'
+  with_items: '{{uwsgi_os_packages}}'
+  when: uwsgi_install != ""
 
-- name: install uwsgi via system package manager
+- name: install uwsgi packages via pip
+  pip:
+    name: '{{item.name|default(item)}}'
+    version: '{{item.version|default(omit,true)}}'
+    virtualenv: '{{uwsgi_virtualenv|default(omit,true)}}'
+  with_items: '{{uwsgi_pip_packages}}'
+  when: uwsgi_install == "pip"
+
+- name: install upstart packages for running uwsgi
   action:
     module: '{{ansible_pkg_mgr}}'
     name: '{{item}}'
-    state: 'present'
-  with_items: '{{uwsgi_packages[ansible_pkg_mgr]|default([])}}'
-  when: 'uwsgi_install == "pkg" and not uwsgi_version'
-
-- name: install specific version of uwsgi via system package manager
-  action:
-    module: '{{ansible_pkg_mgr}}'
-    name: '{{item}}=={{uwsgi_version}}'
     state: present
-  with_items: '{{uwsgi_packages[ansible_pkg_mgr]|default([])}}'
-  when: 'uwsgi_install == "pkg" and uwsgi_version'
-
-- name: install uwsgi via pip
-  pip:
-    name: 'uWSGI'
-    version: '{{uwsgi_version|default(omit,true)}}'
-    virtualenv: '{{uwsgi_virtualenv|default(omit,true)}}'
-  when: 'uwsgi_install == "pip"'
+  with_items: '{{uwsgi_upstart_packages}}'
+  when: _uwsgi_use_upstart
 
 - name: set uwsgi binary path when using virtualenv
   set_fact:
-    uwsgi_bin: '{{uwsgi_virtualenv}}/bin/uwsgi'
-  when: 'uwsgi_use_upstart and uwsgi_install == "pip" and uwsgi_virtualenv and not uwsgi_bin'
+    _uwsgi_bin: '{{_uwsgi_bin|default(uwsgi_virtualenv + "/bin/uwsgi",true)}}'
+  when: _uwsgi_use_upstart and uwsgi_install == "pip" and uwsgi_virtualenv
 
 - name: find uwsgi binary path if not provided
   command: which uwsgi
-  when: uwsgi_use_upstart and not uwsgi_bin
+  when: _uwsgi_use_upstart and not _uwsgi_bin
   changed_when: false
-  failed_when: not uwsgi_bin_which.stdout
-  register: uwsgi_bin_which
+  failed_when: not _uwsgi_bin_which.stdout
+  register: _uwsgi_bin_which
 
 - name: update uwsgi binary path
   set_fact:
-    uwsgi_bin: '{{uwsgi_bin_which.stdout}}'
-  when: uwsgi_use_upstart and not uwsgi_bin
-
-- name: install upstart package for running uwsgi
-  action:
-    module: '{{ansible_pkg_mgr}}'
-    name: '{{uwsgi_upstart_package[ansible_pkg_mgr]}}'
-    state: present
-  when: 'uwsgi_use_upstart and uwsgi_upstart_package[ansible_pkg_mgr] is defined'
+    _uwsgi_bin: '{{_uwsgi_bin_which.stdout}}'
+  when: _uwsgi_use_upstart and not _uwsgi_bin
 
 - name: add upstart uwsgi configuration
   template:
     src: uwsgi-upstart.conf.j2
-    dest: '/etc/init/{{uwsgi_name}}.conf'
-  when: uwsgi_use_upstart
+    dest: '/etc/init/{{_uwsgi_service_name}}.conf'
+  when: _uwsgi_use_upstart
   notify:
     - restart uwsgi
 
-- name: set default emperor conf based on installation method
-  set_fact:
-    uwsgi_emperor_conf: '{{uwsgi_emperor_confs[uwsgi_install][ansible_pkg_mgr]}}'
-  when: 'not uwsgi_emperor_conf and uwsgi_emperor_confs[uwsgi_install][ansible_pkg_mgr] is defined'
+- name: make sure uwsgi conf directory exists
+  file:
+    path: '{{uwsgi_conf_path|dirname}}'
+    state: directory
+  when: uwsgi_conf_template != ""
+
+- name: add uwsgi conf if not present
+  template:
+    src: '{{uwsgi_conf_template}}'
+    dest: '{{uwsgi_conf_path}}'
+    force: '{{uwsgi_conf_force}}'
+  when: uwsgi_conf_template != ""
 
 - name: configure whether uwsgi emperor runs in tyrant mode
   lineinfile:
-    dest: '{{uwsgi_emperor_conf}}'
+    dest: '{{uwsgi_conf_path}}'
     regexp: '^#*?\s*?{{item.name}}\s*?='
     line: "{{item.name}} = {{item.value}}"
   with_items:
-    - {name: emperor-tyrant, value: '{{uwsgi_emperor_tyrant|bool}}'}
-    - {name: cap, value: 'setgid,setuid'}
-  when: uwsgi_emperor_conf is defined and uwsgi_emperor_conf
+    - name: emperor-tyrant
+      value: '{{uwsgi_emperor_tyrant|bool}}'
+    - name: cap
+      value: 'setgid,setuid'
   notify:
     - restart uwsgi
-
-- name: set default vassal path based on installation method
-  set_fact:
-    uwsgi_vassal_path: '{{uwsgi_vassal_paths[uwsgi_install][ansible_pkg_mgr]}}'
-  when: 'not uwsgi_vassal_path and uwsgi_vassal_paths[uwsgi_install][ansible_pkg_mgr] is defined'
 
 - name: make sure uwsgi vassal path exists
   file:
     path: '{{uwsgi_vassal_path}}'
     state: directory
-  when: (uwsgi_vassal_path and uwsgi_use_upstart) or uwsgi_vassals
 
 - name: configure any vassals defined
   template:
     src: uwsgi-vassal.ini.j2
-    dest: '{{uwsgi_vassal_path|mandatory}}/{{item.name|mandatory}}.ini'
-    owner: '{% if uwsgi_emperor_tyrant %}{{item.uid|default(omit)}}{% else %}omit{% endif %}'
-    group: '{% if uwsgi_emperor_tyrant %}{{item.gid|default(omit)}}{% else %}omit{% endif %}'
-  with_items: uwsgi_vassals
+    dest: '{{uwsgi_vassal_path}}/{{item.name|mandatory}}.ini'
+    owner: '{{uwsgi_emperor_tyrant|ternary(item.uid|default(omit),omit)}}'
+    group: '{{uwsgi_emperor_tyrant|ternary(item.gid|default(omit),omit)}}'
+  with_items: '{{uwsgi_vassals|default([])}}'
 
-- name: start the uwsgi service
+- name: remove any vassals no longer needed
+  file:
+    path: '{{uwsgi_vassal_path}}/{{item}}.ini'
+    state: absent
+  with_items: '{{uwsgi_vassals_to_remove|default([])}}'
+
+- name: start and enable the uwsgi service
   service:
-    name: '{{uwsgi_service_name|mandatory}}'
+    name: '{{_uwsgi_service_name}}'
     state: started
+    enabled: true

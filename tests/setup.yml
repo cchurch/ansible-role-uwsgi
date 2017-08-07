@@ -1,0 +1,53 @@
+---
+
+- name: launch docker containers
+  hosts: local
+  gather_facts: false
+  roles:
+    - role: chrismeyersfsu.provision_docker
+
+- name: install epel and configure sudo for centos containers
+  hosts: containers:&centos
+  roles:
+    - role: geerlingguy.repo-epel
+  post_tasks:
+    - name: make sure sudo is installed
+      yum:
+        name: sudo
+        state: present
+    - name: enable sudo with no password for wheel group
+      copy:
+        content: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        dest: /etc/sudoers.d/sudo_wheel
+        mode: 0440
+        owner: root
+        group: root
+    - name: update systemd for service support
+      command: '{{item}}'
+      with_items: []  # FIXME
+      when: inventory_hostname == "uwsgi_centos7"
+
+- name: check and install python on ubuntu containers
+  hosts: containers:&ubuntu
+  gather_facts: false
+  tasks:
+    - name: check for and install python
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    - name: make sure sudo is installed
+      apt:
+        name: sudo
+        state: present
+    - name: enable sudo with no password for sudo group
+      copy:
+        content: '%sudo ALL=(ALL) NOPASSWD: ALL'
+        dest: /etc/sudoers.d/sudo_nopasswd
+        mode: 0440
+        owner: root
+        group: root
+
+
+- name: test connection to containers
+  hosts: containers
+  tasks:
+    - name: ping it
+      action: ping

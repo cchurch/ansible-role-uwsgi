@@ -1,0 +1,5 @@
+*.retry
+.tox
+tests/roles/cchurch.virtualenv
+tests/roles/chrismeyersfsu.provision_docker
+tests/roles/geerlingguy.repo-epel

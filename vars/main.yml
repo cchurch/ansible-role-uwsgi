@@ -1,33 +1,45 @@
 ---
 
-uwsgi_packages:
+uwsgi_default_os_packages:
+  pkg:
+    yum:
+      - uwsgi
+      - uwsgi-plugin-python
+    apt:
+      - uwsgi-emperor
+      - uwsgi-plugin-python
+  pip:
+    yum:
+      - '@Development Tools'
+      - python-devel
+      - python-pip
+    apt:
+      - build-essential
+      - python-dev
+      - python-pip
+
+uwsgi_default_pip_packages:
+  - uwsgi
+
+uwsgi_default_upstart_packages:
   yum:
-    - uwsgi
-    - uwsgi-plugin-python
+    - upstart
+    - which
   apt:
-    - uwsgi-emperor
-    - uwsgi-plugin-python
-  pip:
-    - uwsgi
+    - upstart
 
-uwsgi_upstart_packages:
-  yum: upstart
-  apt: upstart
+uwsgi_default_conf_templates:
+  yum: uwsgi.ini.j2
+  apt: emperor.ini.j2
 
-uwsgi_emperor_confs:
-  pkg:
-    yum: /etc/uwsgi.ini
-    apt: /etc/uwsgi-emperor/emperor.ini
+uwsgi_default_conf_paths:
+  yum: /etc/uwsgi.ini
+  apt: /etc/uwsgi-emperor/emperor.ini
 
-uwsgi_vassal_paths:
-  pkg:
-    yum: /etc/uwsgi.d
-    apt: /etc/uwsgi-emperor/vassals
-  pip:
-    yum: /etc/uwsgi.d
-    apt: /etc/uwsgi-emperor/vassals
+uwsgi_default_vassal_paths:
+  yum: /etc/uwsgi.d
+  apt: /etc/uwsgi-emperor/vassals
 
-uwsgi_service_names:
-  pkg:
-    yum: uwsgi
-    apt: uwsgi-emperor
+uwsgi_default_service_names:
+  yum: uwsgi
+  apt: uwsgi-emperor
