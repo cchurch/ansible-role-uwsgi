@@ -6,8 +6,8 @@ After=syslog.target
 
 [Service]
 EnvironmentFile=-/etc/sysconfig/uwsgi
-ExecStartPre=/bin/mkdir -p /run/uwsgi
-ExecStartPre=/bin/chown uwsgi:uwsgi /run/uwsgi
+ExecStartPre=/bin/mkdir -p {{uwsgi_user_group.home|default("/run/uwsgi")}}
+ExecStartPre=/bin/chown {{uwsgi_user_group.name|default("uwsgi")}}:{{uwsgi_user_group.group|default("uwsgi")}} {{uwsgi_user_group.home|default("/run/uwsgi")}}
 ExecStart={{_uwsgi_bin}} {{uwsgi_opts}}
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT

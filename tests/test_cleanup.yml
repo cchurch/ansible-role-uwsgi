@@ -44,3 +44,11 @@
         - '/etc/init/{{uwsgi_default_service_names[ansible_pkg_mgr]}}.conf'
         - '/etc/init/uwsgi_venv.conf'
         - '/var/lib/uwsgi_venv'
+    - name: remove uwsgi user (applies to centos only)
+      user:
+        name: uwsgi
+        state: absent
+    - name: remove uwsgi group (applies to centos only)
+      group:
+        name: uwsgi
+        state: absent

@@ -43,6 +43,22 @@
   with_items: '{{uwsgi_pip_packages}}'
   when: uwsgi_install == "pip"
 
+- name: create group for running uwsgi
+  group:
+    name: '{{uwsgi_user_group.group}}'
+    system: '{{uwsgi_user_group.system|default(true)}}'
+  when: uwsgi_install != "pkg" and uwsgi_user_group.group|default("")
+
+- name: create user for running uwsgi
+  user:
+    name: '{{uwsgi_user_group.name}}'
+    comment: '{{uwsgi_user_group.comment|default(omit)}}'
+    group: '{{uwsgi_user_group.group|default(omit)}}'
+    home: '{{uwsgi_user_group.home|default(omit)}}'
+    shell: '{{uwsgi_user_group.shell|default(omit)}}'
+    system: '{{uwsgi_user_group.system|default(true)}}'
+  when: uwsgi_install != "pkg" and uwsgi_user_group.name|default("")
+
 - name: install upstart packages for running uwsgi
   action:
     module: '{{ansible_pkg_mgr}}'

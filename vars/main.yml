@@ -28,6 +28,21 @@ uwsgi_default_upstart_packages:
   apt:
     - upstart
 
+uwsgi_default_user_group:
+  yum:
+    name: uwsgi
+    comment: 'uWSGI daemon user'
+    group: uwsgi
+    home: /run/uwsgi
+    shell: /sbin/nologin
+    system: true
+  apt:
+    name: www-data
+    group: www-data
+    home: /var/www
+    shell: /usr/sbin/nologin
+    system: true
+
 uwsgi_default_conf_templates:
   yum: uwsgi.ini.j2
   apt: emperor.ini.j2

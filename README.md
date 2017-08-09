@@ -64,6 +64,13 @@ The following variables may be used to customize the service configuration when
 uWSGI is not installed via the system package manager and managed via upstart or
 systemd:
 
+- `uwsgi_user_group`: User/group information for running the uWSGI emperor.
+  Default is set from `uwsgi_default_user_group[ansible_pkg_mgr]`, which creates
+  `"uwsgi:uwsgi"` system user and group on EL distributions and
+  `"www-data:www-data"` system user and group on Ubuntu distributions, the same
+  as would be used by the system package version of uWSGI. The user/group hash
+  may contain `name`, `comment`, `group`, `home`, `shell` and `system` keys,
+  corresponding to the equivalent parameters to the Ansible `user` module.
 - `uwsgi_service_name`: Name of uWSGI service. Default is set from
   `uwsgi_default_service_names[ansible_pkg_mgr]`, which evaluates to `"uwsgi"`
   for EL distributions and `"uwsgi-emperor"` for Ubuntu distributions.
