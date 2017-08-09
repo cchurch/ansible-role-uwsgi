@@ -13,10 +13,12 @@ uwsgi_default_os_packages:
       - '@Development Tools'
       - python-devel
       - python-pip
+      - libcap-devel
     apt:
       - build-essential
       - python-dev
       - python-pip
+      - libcap-dev
 
 uwsgi_default_pip_packages:
   - uwsgi

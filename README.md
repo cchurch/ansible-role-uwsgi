@@ -32,7 +32,8 @@ used for the uWSGI emperor:
 
 - `uwsgi_emperor_tyrant`: Run emperor in tyrant mode.  Each vassal configuration
   file will be owned by the uid/gid specified in the vassal options and run as
-  that user instead of the emperor user.  Default is `true`.
+  that user instead of the emperor user.  Default is `true` when
+  `uwsgi_install == "pip"`, `false otherwise`.
 - `uwsgi_conf_template`: Local template to use for generating the uWSGI emperor
   configuration. Default is set from `uwsgi_default_conf_templates[ansible_pkg_mgr]`,
   which evaluates to `"uwsgi.ini.j2"` on EL distributions and `"emperor.ini.j2"`

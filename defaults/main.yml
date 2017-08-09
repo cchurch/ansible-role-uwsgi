@@ -25,7 +25,7 @@ uwsgi_systemd_path: '/etc/systemd/system/{{_uwsgi_service_name}}.service'
 uwsgi_bin: ''
 uwsgi_opts: '--die-on-term --ini {{uwsgi_conf_path|quote}}'
 
-uwsgi_emperor_tyrant: true
+uwsgi_emperor_tyrant: '{{(uwsgi_install == "pip")|bool}}'
 
 uwsgi_conf_template: '{{uwsgi_default_conf_templates[ansible_pkg_mgr]|default("")}}'
 uwsgi_conf_path: '{{uwsgi_emperor_conf|default(uwsgi_default_conf_paths[ansible_pkg_mgr]|default(""),true)}}'
