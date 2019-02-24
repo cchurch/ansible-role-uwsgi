@@ -122,7 +122,7 @@
     - name: emperor-tyrant
       value: '{{uwsgi_emperor_tyrant|bool}}'
     - name: cap
-      value: 'setgid,setuid'
+      value: 'setgid,setuid,sys_chroot,setpcap'
   notify:
     - restart uwsgi
 
