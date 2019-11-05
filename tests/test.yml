@@ -4,10 +4,11 @@
   hosts: containers
   tags: [always]
   tasks:
-    - action: ping
+    - name: ping
+      ping:
 
 - name: cleanup before test using os package manager
-  include: test_cleanup.yml
+  import_tasks: test_cleanup.yml
   tags: [pkg, pkg-cleanup]
 
 - name: test installation using os package manager
@@ -44,13 +45,13 @@
   gather_facts: false
   tags: [virtualenv]
   vars:
-    virtualenv_path: '/var/lib/uwsgi_venv'
+    virtualenv_path: /var/lib/uwsgi_venv
     uwsgi_service_name: uwsgi_venv
     uwsgi_install: pip
-    uwsgi_version: '2.0.14'
-    uwsgi_virtualenv: '{{virtualenv_path}}'
-    uwsgi_conf_path: '{{virtualenv_path}}/etc/uwsgi.ini'
-    uwsgi_vassal_path: '{{virtualenv_path}}/etc/uwsgi_vassals'
+    uwsgi_version: "2.0.14"
+    uwsgi_virtualenv: "{{ virtualenv_path }}"
+    uwsgi_conf_path: "{{ virtualenv_path }}/etc/uwsgi.ini"
+    uwsgi_vassal_path: "{{ virtualenv_path }}/etc/uwsgi_vassals"
     uwsgi_vassals:
       - name: test
   roles:

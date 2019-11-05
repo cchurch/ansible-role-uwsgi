@@ -1,37 +1,37 @@
 ---
 
-uwsgi_service_name: ''
+uwsgi_service_name: ""
 
-# 'pkg', 'pip' or ''
-uwsgi_install: 'pkg'
-#uwsgi_version: ''
-uwsgi_virtualenv: ''
+# "pkg", "pip" or ""
+uwsgi_install: "pkg"
+#uwsgi_version: ""
+uwsgi_virtualenv: ""
 
-uwsgi_os_packages: '{{(uwsgi_default_os_packages[uwsgi_install]|default({}))[ansible_pkg_mgr]|default([])}}'
-uwsgi_pip_packages: '{{uwsgi_default_pip_packages|default([])}}'
+uwsgi_os_packages: "{{ (uwsgi_default_os_packages[uwsgi_install] | default({}))[ansible_pkg_mgr] | default([]) }}"
+uwsgi_pip_packages: "{{ uwsgi_default_pip_packages | default([]) }}"
 
-uwsgi_user_group: '{{uwsgi_default_user_group[ansible_pkg_mgr]|default({})}}'
+uwsgi_user_group: "{{ uwsgi_default_user_group[ansible_pkg_mgr] | default({}) }}"
 
 #uwsgi_use_upstart: no
-uwsgi_upstart_packages: '{{uwsgi_default_upstart_packages[ansible_pkg_mgr]|default([])}}'
-uwsgi_upstart_description: 'uWSGI Server'
-uwsgi_upstart_template: 'uwsgi-upstart.conf.j2'
-uwsgi_upstart_path: '/etc/init/{{_uwsgi_service_name}}.conf'
+uwsgi_upstart_packages: "{{ uwsgi_default_upstart_packages[ansible_pkg_mgr] | default([]) }}"
+uwsgi_upstart_description: "uWSGI Server"
+uwsgi_upstart_template: "uwsgi-upstart.conf.j2"
+uwsgi_upstart_path: "/etc/init/{{ _uwsgi_service_name }}.conf"
 
 #uwsgi_use_systemd: no
-uwsgi_systemd_template: 'uwsgi.service.j2'
-uwsgi_systemd_path: '/etc/systemd/system/{{_uwsgi_service_name}}.service'
+uwsgi_systemd_template: "uwsgi.service.j2"
+uwsgi_systemd_path: "/etc/systemd/system/{{ _uwsgi_service_name }}.service"
 
-uwsgi_bin: ''
-uwsgi_opts: '--die-on-term --ini {{uwsgi_conf_path|quote}}'
+uwsgi_bin: ""
+uwsgi_opts: "--die-on-term --ini {{ uwsgi_conf_path | quote }}"
 
-uwsgi_emperor_tyrant: '{{(uwsgi_install == "pip")|bool}}'
+uwsgi_emperor_tyrant: "{{ (uwsgi_install == 'pip') | bool }}"
 
-uwsgi_conf_template: '{{uwsgi_default_conf_templates[ansible_pkg_mgr]|default("")}}'
-uwsgi_conf_path: '{{uwsgi_emperor_conf|default(uwsgi_default_conf_paths[ansible_pkg_mgr]|default(""),true)}}'
+uwsgi_conf_template: "{{ uwsgi_default_conf_templates[ansible_pkg_mgr] | default('') }}"
+uwsgi_conf_path: "{{ uwsgi_emperor_conf | default(uwsgi_default_conf_paths[ansible_pkg_mgr] | default(''), true) }}"
 uwsgi_conf_force: false
 
-uwsgi_vassal_path: '{{uwsgi_default_vassal_paths[ansible_pkg_mgr]|default("")}}'
+uwsgi_vassal_path: "{{ uwsgi_default_vassal_paths[ansible_pkg_mgr] | default('') }}"
 uwsgi_vassals: []
 # - name: vassal name
 #   key: value

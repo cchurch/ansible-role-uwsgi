@@ -10,7 +10,7 @@ uwsgi_default_os_packages:
       - uwsgi-plugin-python
   pip:
     yum:
-      - '@Development Tools'
+      - "@Development Tools"
       - python-devel
       - python-pip
       - libcap-devel
@@ -33,7 +33,7 @@ uwsgi_default_upstart_packages:
 uwsgi_default_user_group:
   yum:
     name: uwsgi
-    comment: 'uWSGI daemon user'
+    comment: "uWSGI daemon user"
     group: uwsgi
     home: /run/uwsgi
     shell: /sbin/nologin

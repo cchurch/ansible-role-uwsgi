@@ -8,42 +8,42 @@
   tasks:
     - name: stop uwsgi service
       service:
-        name: '{{uwsgi_default_service_names[ansible_pkg_mgr]}}'
+        name: "{{ uwsgi_default_service_names[ansible_pkg_mgr] }}"
         state: stopped
       ignore_errors: true
     - name: remove uwsgi os packages
       action:
-        module: '{{ansible_pkg_mgr}}'
-        name: '{{item}}'
+        module: "{{ ansible_pkg_mgr }}"
+        name: "{{ item }}"
         state: absent
-        purge: '{{(ansible_pkg_mgr == "apt")|ternary(true,omit)}}'
-      with_items: '{{uwsgi_default_os_packages["pkg"][ansible_pkg_mgr]}}'
+        purge: "{{ (ansible_pkg_mgr == 'apt') | ternary(true, omit) }}"
+      with_items: "{{ uwsgi_default_os_packages['pkg'][ansible_pkg_mgr] }}"
     - name: remove uwsgi upstart packages
       action:
-        module: '{{ansible_pkg_mgr}}'
-        name: '{{item}}'
+        module: "{{ ansible_pkg_mgr }}"
+        name: "{{ item }}"
         state: absent
-        purge: '{{(ansible_pkg_mgr == "apt")|ternary(true,omit)}}'
-      when: item != "which" and inventory_hostname != "uwsgi_ubuntu14"
-      with_items: '{{uwsgi_default_upstart_packages[ansible_pkg_mgr]}}'
+        purge: "{{ (ansible_pkg_mgr == 'apt') | ternary(true, omit) }}"
+      when: item != 'which' and inventory_hostname != 'uwsgi_ubuntu14'
+      with_items: "{{ uwsgi_default_upstart_packages[ansible_pkg_mgr] }}"
     - name: remove uwsgi pip packages
       pip:
-        name: '{{item.name|default(item)}}'
-        version: '{{item.version|default(omit,true)}}'
+        name: "{{ item.name | default(item) }}"
+        version: "{{ item.version | default(omit, true) }}"
         state: absent
-      with_items: '{{uwsgi_default_pip_packages}}'
+      with_items: "{{ uwsgi_default_pip_packages }}"
       ignore_errors: true
     - name: remove configs and vassals
       file:
-        path: '{{item}}'
+        path: "{{ item }}"
         state: absent
       with_items:
-        - '{{uwsgi_default_conf_paths[ansible_pkg_mgr]}}'
-        - '{{uwsgi_default_vassal_paths[ansible_pkg_mgr]}}'
-        - '/etc/uwsgi-emperor/'
-        - '/etc/init/{{uwsgi_default_service_names[ansible_pkg_mgr]}}.conf'
-        - '/etc/init/uwsgi_venv.conf'
-        - '/var/lib/uwsgi_venv'
+        - "{{ uwsgi_default_conf_paths[ansible_pkg_mgr] }}"
+        - "{{ uwsgi_default_vassal_paths[ansible_pkg_mgr] }}"
+        - "/etc/uwsgi-emperor/"
+        - "/etc/init/{{ uwsgi_default_service_names[ansible_pkg_mgr] }}.conf"
+        - "/etc/init/uwsgi_venv.conf"
+        - "/var/lib/uwsgi_venv"
     - name: remove uwsgi user (applies to centos only)
       user:
         name: uwsgi
