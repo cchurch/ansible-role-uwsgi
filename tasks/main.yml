@@ -37,11 +37,9 @@
   when: _uwsgi_use_upstart and _uwsgi_use_systemd
 
 - name: install uwsgi packages via system package manager
-  action:
-    module: "{{ ansible_pkg_mgr }}"
-    name: "{{ item }}"
+  package:
+    name: "{{ uwsgi_os_packages }}"
     state: "present"
-  with_items: "{{ uwsgi_os_packages }}"
   when: uwsgi_install != ''
 
 - name: install uwsgi packages via pip
@@ -49,6 +47,7 @@
     name: "{{ item.name | default(item) }}"
     version: "{{ item.version | default(uwsgi_version, true) | default(omit, true) }}"
     virtualenv: "{{ uwsgi_virtualenv | default(omit, true) }}"
+    executable: "{{ uwsgi_pip_executable | default(omit, true) }}"
   with_items: "{{ uwsgi_pip_packages }}"
   when: uwsgi_install == 'pip'
 
@@ -69,12 +68,15 @@
   when: uwsgi_install != 'pkg' and uwsgi_user_group.name | default('')
 
 - name: install upstart packages for running uwsgi
-  action:
-    module: "{{ ansible_pkg_mgr }}"
-    name: "{{ item }}"
+  package:
+    name: "{{ uwsgi_upstart_packages }}"
     state: present
-  with_items: "{{ uwsgi_upstart_packages }}"
   when: _uwsgi_use_upstart
+  register: _uwsgi_upstart_install_result
+
+- name: refresh facts if upstart was just installed to update ansible_service_mgr
+  setup:
+  when: _uwsgi_use_upstart and _uwsgi_upstart_install_result is changed
 
 - name: set uwsgi binary path when using virtualenv
   set_fact:
@@ -98,8 +100,13 @@
     src: "{{ uwsgi_upstart_template }}"
     dest: "{{ uwsgi_upstart_path }}"
   when: _uwsgi_use_upstart
+  register: _uwsgi_upstart_config_result
   notify:
     - restart uwsgi
+
+- name: reload upstart configuration if upstart installed or uwsgi conf changed
+  command: initctl reload-configuration
+  when: _uwsgi_use_upstart and (_uwsgi_upstart_install_result is changed or _uwsgi_upstart_config_result is changed)
 
 - name: add systemd uwsgi configuration
   template:

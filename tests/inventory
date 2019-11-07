@@ -6,10 +6,12 @@ ansible_connection=local
 ansible_python_interpreter=/usr/bin/env python
 
 [containers]
-uwsgi_centos6 image="chrismeyers/centos6"
-uwsgi_centos7 image="chrismeyers/centos7"
+uwsgi_centos6 image="flyingfred0/ansible-role-testing:centos6-init"
+uwsgi_centos7 image="centos:7"  #image="chrismeyers/centos7"
+uwsgi_centos8 image="centos:8"
 uwsgi_ubuntu14 image="ubuntu:trusty"
 uwsgi_ubuntu16 image="ubuntu:xenial"
+uwsgi_ubuntu18 image="ubuntu:bionic"
 
 [containers:vars]
 ansible_connection=docker
@@ -18,19 +20,42 @@ ansible_user=root
 [centos:children]
 centos6
 centos7
+centos8
 
 [centos6]
 uwsgi_centos6
 
+[centos6:vars]
+test_pip2_executable=pip2.7
+test_pip3_executable=pip3.5
+test_virtualenv_python3=python3.5
+
 [centos7]
 uwsgi_centos7
+
+[centos7:vars]
+test_pip2_executable=pip2.7
+test_pip3_executable=pip3.6
+test_virtualenv_python3=python3.6
+
+[centos8]
+uwsgi_centos8
+
+[centos8:vars]
+ansible_python_interpreter=/usr/libexec/platform-python
+test_pip2_executable=pip2
+test_pip3_executable=pip3
 
 [ubuntu:children]
 ubuntu14
 ubuntu16
+ubuntu18
 
 [ubuntu14]
 uwsgi_ubuntu14
 
 [ubuntu16]
 uwsgi_ubuntu16
+
+[ubuntu18]
+uwsgi_ubuntu18

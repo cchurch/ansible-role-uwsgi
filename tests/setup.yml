@@ -9,41 +9,66 @@
         - "{{ inventory_hostname }}"
       delegate_to: localhost
 
-- name: install epel on centos container
+- name: install epel on centos containers
   hosts: containers:&centos
   tasks:
     - name: install epel
       yum:
         name: epel-release
 
-# - name: install epel on centos containers (based on geerlingguy.repo-epel)
-#   hosts: containers:&centos
-#   vars:
-#     epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ansible_distribution_major_version}}.noarch.rpm"
-#     epel_repo_gpg_key: '/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ansible_distribution_major_version}}'
-#     epel_repo_path: '/etc/yum.repos.d/epel.repo'
-#   tasks:
-#     - name: check if epel repo is configured
-#       stat:
-#         path: '{{epel_repo_path}}'
-#       register: epel_repo_path_result
-#     - name: install epel repo
-#       yum:
-#         name: '{{epel_repo_url}}'
-#         state: present
-#       register: epel_repo_result
-#       until: '"failed" not in epel_repo_result'
-#       retries: 5
-#       delay: 10
-#       when: not epel_repo_path_result.stat.exists
-#     - name: import epel gpg key when no keys exist (workaround rpm_key bug)
-#       shell: rpm -q gpg-pubkey || rpm --import {{epel_repo_gpg_key|quote}}
-#       when: not epel_repo_path_result.stat.exists
-#     - name: import epel gpg key
-#       rpm_key:
-#         key: '{{epel_repo_gpg_key}}'
-#         state: present
-#       when: not epel_repo_path_result.stat.exists and ansible_distribution_major_version < 7
+- name: install python 2.7 and 3.5 for centos6 container
+  hosts: containers:&centos6
+  gather_facts: false
+  tasks:
+    - name: install ius repo
+      shell: |
+        set -o pipefail
+        curl 'https://setup.ius.io/' | sh
+      args:
+        warn: false
+      register: _ius_install_result
+      changed_when: "'Nothing to do' not in _ius_install_result.stdout"
+    - name: install python 2.7 and 3.5 and pip
+      yum:
+        name:
+          - python-setuptools  # needed for pip module to work?
+          - python27
+          - python27-pip
+          - python27-devel
+          - python35u
+          - python35u-pip
+          - python35u-devel
+
+- name: install epel and python36 on centos7 container
+  hosts: containers:&centos7
+  tasks:
+    - name: install epel
+      yum:
+        name: epel-release
+    - name: install pip and python3
+      yum:
+        name:
+          - python-pip
+          - python-devel
+          - python36
+          - python36-pip
+          - python36-devel
+
+- name: install epel and python36 on centos8 container
+  hosts: containers:&centos8
+  tasks:
+    - name: install epel
+      package:
+        name: epel-release
+    - name: install python2 and python3 with pip
+      package:
+        name:
+          - python2
+          - python2-pip
+          - python2-devel
+          - python3
+          - python3-pip
+          - python3-devel
 
 - name: check and install python on ubuntu containers
   hosts: containers:&ubuntu
