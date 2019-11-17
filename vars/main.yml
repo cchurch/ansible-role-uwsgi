@@ -22,11 +22,13 @@ uwsgi_default_os_packages:
       - python-devel
       - python-pip
       - libcap-devel
+      - which
     yum:
       - "@Development Tools"
       - python-devel
       - python-pip
       - libcap-devel
+      - which
 
 uwsgi_default_pip_packages:
   - uwsgi

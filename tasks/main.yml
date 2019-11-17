@@ -41,6 +41,11 @@
     name: "{{ uwsgi_os_packages }}"
     state: "present"
   when: uwsgi_install != ''
+  register: _uwsgi_os_packages_result
+
+- name: create systemd tempfiles if using systemd and uwsgi packages were just installed
+  command: systemd-tmpfiles --create
+  when: uwsgi_install == 'pkg' and _uwsgi_os_packages_result is changed and ansible_service_mgr == 'systemd'
 
 - name: install uwsgi packages via pip
   pip:
@@ -113,8 +118,13 @@
     src: "{{ uwsgi_systemd_template }}"
     dest: "{{ uwsgi_systemd_path }}"
   when: _uwsgi_use_systemd
+  register: _uwsgi_systemd_config_result
   notify:
     - restart uwsgi
+
+- name: reload systemd daemon if uwsgi systemd conf changed
+  command: systemctl daemon-reload
+  when: _uwsgi_use_systemd and _uwsgi_systemd_config_result is changed
 
 - name: make sure uwsgi conf directory exists
   file:
