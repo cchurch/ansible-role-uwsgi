@@ -72,6 +72,15 @@
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
       register: _python_install_result
       changed_when: _python_install_result.stdout
+    - name: run setup to gather facts now
+      setup:
+    - name: install python 2.7 and 3.x including pip
+      package:
+        name:
+          - python-dev
+          - python-pip
+          - python3-dev
+          - python3-pip
 
 - name: test connection to containers
   hosts: containers

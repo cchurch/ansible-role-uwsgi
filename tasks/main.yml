@@ -8,12 +8,20 @@
       default(''), true) }}
     _uwsgi_use_upstart: >-
       {{ uwsgi_use_upstart |
-      default(uwsgi_install != 'pkg' and not (ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('7', '>='))) |
-      bool }}
+      default(
+        uwsgi_install != 'pkg' and not (
+          (ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('7', '>=')) or
+          (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version_compare('18', '>='))
+        )
+      ) | bool }}
     _uwsgi_use_systemd: >-
       {{ uwsgi_use_systemd |
-      default(uwsgi_install != 'pkg' and ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('7', '>=')) |
-      bool }}
+      default(
+        uwsgi_install != 'pkg' and (
+          (ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('7', '>=')) or
+          (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version_compare('18', '>='))
+        )
+      ) | bool }}
     _uwsgi_bin: "{{ uwsgi_bin | default('', true) }}"
 
 - name: package installation isn't supported on EL 8
@@ -128,7 +136,8 @@
     - restart uwsgi
 
 - name: reload systemd daemon if uwsgi systemd conf changed
-  command: systemctl daemon-reload
+  systemd:
+    daemon_reload: true
   when: _uwsgi_use_systemd and _uwsgi_systemd_config_result is changed
 
 - name: make sure uwsgi conf directory exists

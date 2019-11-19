@@ -11,7 +11,7 @@ uwsgi_centos7 image="flyingfred0/ansible-role-testing:centos7-systemd"
 uwsgi_centos8 image="flyingfred0/ansible-role-testing:centos8-systemd"
 uwsgi_ubuntu14 image="ubuntu:trusty"
 uwsgi_ubuntu16 image="ubuntu:xenial"
-uwsgi_ubuntu18 image="ubuntu:bionic"
+uwsgi_ubuntu18 image="flyingfred0/ansible-role-testing:ubuntu18-systemd"
 
 [containers:vars]
 ansible_connection=docker
