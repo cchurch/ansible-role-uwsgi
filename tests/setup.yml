@@ -13,7 +13,7 @@
   hosts: containers:&centos
   tasks:
     - name: install epel
-      yum:
+      package:
         name: epel-release
 
 - name: install python 2.7 and 3.5 for centos6 container
@@ -28,47 +28,41 @@
         warn: false
       register: _ius_install_result
       changed_when: "'Nothing to do' not in _ius_install_result.stdout"
-    - name: install python 2.7 and 3.5 and pip
-      yum:
+    - name: install python 2.7 and 3.5 including pip
+      package:
         name:
           - python-setuptools  # needed for pip module to work?
           - python27
-          - python27-pip
           - python27-devel
+          - python27-pip
           - python35u
-          - python35u-pip
           - python35u-devel
+          - python35u-pip
 
-- name: install epel and python36 on centos7 container
+- name: install python36 on centos7 container
   hosts: containers:&centos7
   tasks:
-    - name: install epel
-      yum:
-        name: epel-release
-    - name: install pip and python3
-      yum:
+    - name: install python 2.7 and 3.6 including pip
+      package:
         name:
-          - python-pip
           - python-devel
+          - python-pip
           - python36
-          - python36-pip
           - python36-devel
+          - python36-pip
 
-- name: install epel and python36 on centos8 container
+- name: install python36 on centos8 container
   hosts: containers:&centos8
   tasks:
-    - name: install epel
-      package:
-        name: epel-release
-    - name: install python2 and python3 with pip
+    - name: install python 2.7 and 3.6 including pip
       package:
         name:
           - python2
-          - python2-pip
           - python2-devel
+          - python2-pip
           - python3
-          - python3-pip
           - python3-devel
+          - python3-pip
 
 - name: check and install python on ubuntu containers
   hosts: containers:&ubuntu

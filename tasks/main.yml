@@ -8,13 +8,18 @@
       default(''), true) }}
     _uwsgi_use_upstart: >-
       {{ uwsgi_use_upstart |
-      default(uwsgi_install != 'pkg' and (ansible_os_family != 'RedHat' or ansible_distribution_major_version != '7')) |
+      default(uwsgi_install != 'pkg' and not (ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('7', '>='))) |
       bool }}
     _uwsgi_use_systemd: >-
       {{ uwsgi_use_systemd |
-      default(uwsgi_install != 'pkg' and ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7') |
+      default(uwsgi_install != 'pkg' and ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('7', '>=')) |
       bool }}
     _uwsgi_bin: "{{ uwsgi_bin | default('', true) }}"
+
+- name: package installation isn't supported on EL 8
+  fail:
+    msg: uwsgi_install == 'pkg' is not supported on EL 8
+  when: uwsgi_install == 'pkg' and ansible_os_family == 'RedHat' and ansible_distribution_major_version is version_compare('8', '==')
 
 - name: check that uwsgi service name is defined
   fail:
@@ -36,7 +41,7 @@
     msg: only one of uwsgi_use_upstart or uwsgi_use_systemd should be enabled
   when: _uwsgi_use_upstart and _uwsgi_use_systemd
 
-- name: install uwsgi packages via system package manager
+- name: install uwsgi packages / dependencies via system package manager
   package:
     name: "{{ uwsgi_os_packages }}"
     state: "present"
@@ -92,7 +97,7 @@
   command: which uwsgi
   when: (_uwsgi_use_upstart or _uwsgi_use_systemd) and not _uwsgi_bin
   changed_when: false
-  failed_when: not _uwsgi_bin_which.stdout
+  failed_when: _uwsgi_bin_which.rc != 0 or not _uwsgi_bin_which.stdout
   register: _uwsgi_bin_which
 
 - name: update uwsgi binary path

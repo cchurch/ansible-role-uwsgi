@@ -8,7 +8,7 @@
       ping:
 
 - name: test installation using os package manager
-  hosts: containers
+  hosts: containers:!centos8
   gather_facts: false
   tags: [pkg]
   vars:

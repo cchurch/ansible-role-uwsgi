@@ -5,28 +5,20 @@ uwsgi_default_os_packages:
     apt:
       - uwsgi-emperor
       - uwsgi-plugin-python
-    dnf:
-      - uwsgi
-      - uwsgi-plugin-python
+    dnf: []  # No uWSGI packages available on EL 8 :-(.
     yum:
       - uwsgi
       - uwsgi-plugin-python2
   pip:
     apt:
       - build-essential
-      - python-dev
-      - python-pip
       - libcap-dev
     dnf:
       - "@Development Tools"
-      - python-devel
-      - python-pip
       - libcap-devel
       - which
     yum:
       - "@Development Tools"
-      - python-devel
-      - python-pip
       - libcap-devel
       - which
 

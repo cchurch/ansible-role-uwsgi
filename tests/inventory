@@ -8,7 +8,7 @@ ansible_python_interpreter=/usr/bin/env python
 [containers]
 uwsgi_centos6 image="flyingfred0/ansible-role-testing:centos6-init"
 uwsgi_centos7 image="flyingfred0/ansible-role-testing:centos7-systemd"
-uwsgi_centos8 image="centos:8"
+uwsgi_centos8 image="flyingfred0/ansible-role-testing:centos8-systemd"
 uwsgi_ubuntu14 image="ubuntu:trusty"
 uwsgi_ubuntu16 image="ubuntu:xenial"
 uwsgi_ubuntu18 image="ubuntu:bionic"
@@ -43,8 +43,6 @@ uwsgi_centos8
 
 [centos8:vars]
 ansible_python_interpreter=/usr/libexec/platform-python
-test_pip2_executable=pip2
-test_pip3_executable=pip3
 
 [ubuntu:children]
 ubuntu14

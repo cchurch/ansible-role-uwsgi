@@ -14,13 +14,13 @@
   package:
     name: "{{ uwsgi_default_os_packages['pkg'][ansible_pkg_mgr] }}"
     state: absent
-    purge: "{{ (ansible_pkg_mgr == 'apt' or ansible_pkg_mgr == 'dnf') | ternary(true, omit) }}"
+    purge: "{{ (ansible_pkg_mgr == 'apt') | ternary(true, omit) }}"
 
 - name: remove uwsgi upstart packages
   package:
     name: upstart
     state: absent
-    purge: "{{ (ansible_pkg_mgr == 'apt' or ansible_pkg_mgr == 'dnf') | ternary(true, omit) }}"
+    purge: "{{ (ansible_pkg_mgr == 'apt') | ternary(true, omit) }}"
   when: inventory_hostname != 'uwsgi_ubuntu14'
 
 - name: remove uwsgi pip2 packages
