@@ -4,7 +4,7 @@
 uWSGI
 =====
 
-Install uWSGI in emperor mode and configure vassals. Requires Ansible 2.1 or
+Install uWSGI in emperor mode and configure vassals. Requires Ansible 2.4 or
 later.
 
 Role Variables
@@ -60,6 +60,9 @@ support uWSGI:
 - `uwsgi_pip_packages`: List of pip packages to install to support uWSGI when
   `uwsgi_install == "pip"`. Default is set from `uwsgi_default_pip_packages`,
   which evaluates to `["uwsgi"]`.
+- `uwsgi_pip_executable`: Alternate name or path of pip used to install packages
+  when `uwsgi_install == "pip"` and not installing into a virtualenv. Default is
+  to let the `pip` module determine which pip executable to use.
 
 The following variables may be used to customize the service configuration when
 uWSGI is not installed via the system package manager and managed via upstart or
@@ -114,18 +117,19 @@ vassal running a Django site:
     - hosts: all
       roles:
         - role: cchurch.uwsgi
-          uwsgi_install: pip
-          uwsgi_vassals:
-            - name: example
-              plugin: python
-              chdir: /opt/example/src
-              module: example.wsgi
-              home: /opt/example/env
-              env: DJANGO_SETTINGS_MODULE=example.settings
-              processes: 4
-              socket: 127.0.0.1:8000
-              uid: example
-              gid: example
+          vars:
+            uwsgi_install: pip
+            uwsgi_vassals:
+              - name: example
+                plugin: python
+                chdir: /opt/example/src
+                module: example.wsgi
+                home: /opt/example/env
+                env: DJANGO_SETTINGS_MODULE=example.settings
+                processes: 4
+                socket: 127.0.0.1:8000
+                uid: example
+                gid: example
 
 License
 -------
