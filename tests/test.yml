@@ -9,7 +9,6 @@
 
 - name: test installation using os package manager
   hosts: containers:!centos8
-  gather_facts: false
   tags: [pkg]
   vars:
     uwsgi_vassals:
@@ -23,7 +22,6 @@
 
 - name: test installation using pip2
   hosts: containers
-  gather_facts: false
   tags: [pip, pip2]
   vars:
     uwsgi_install: pip
@@ -45,7 +43,6 @@
 
 - name: test installation using pip3
   hosts: containers
-  gather_facts: false
   tags: [pip, pip3]
   vars:
     uwsgi_install: pip
@@ -67,7 +64,6 @@
 
 - name: test installation in python2 virtualenv with custom service name and paths
   hosts: containers
-  gather_facts: false
   tags: [virtualenv, virtualenv2]
   vars:
     virtualenv_path: /var/lib/uwsgi_venv2
@@ -90,7 +86,6 @@
 
 - name: test installation in python3 virtualenv with custom service name and paths
   hosts: containers
-  gather_facts: false
   tags: [virtualenv, virtualenv3]
   vars:
     virtualenv_path: /var/lib/uwsgi_venv3

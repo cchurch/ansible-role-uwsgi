@@ -2,7 +2,7 @@
 
 - name: stop uwsgi service
   service:
-    name: "{{ uwsgi_default_service_names[ansible_pkg_mgr] }}"
+    name: "{{ item }}"
     state: stopped
   with_items:
     - "{{ uwsgi_default_service_names[ansible_pkg_mgr] }}"
