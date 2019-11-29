@@ -9,7 +9,6 @@ ansible_python_interpreter=/usr/bin/env python
 uwsgi_centos6 image="flyingfred0/ansible-role-testing:centos6-init"
 uwsgi_centos7 image="flyingfred0/ansible-role-testing:centos7-systemd"
 uwsgi_centos8 image="flyingfred0/ansible-role-testing:centos8-systemd"
-uwsgi_ubuntu14 image="ubuntu:trusty"
 uwsgi_ubuntu16 image="ubuntu:xenial"
 uwsgi_ubuntu18 image="flyingfred0/ansible-role-testing:ubuntu18-systemd"
 
@@ -45,12 +44,8 @@ uwsgi_centos8
 ansible_python_interpreter=/usr/libexec/platform-python
 
 [ubuntu:children]
-ubuntu14
 ubuntu16
 ubuntu18
-
-[ubuntu14]
-uwsgi_ubuntu14
 
 [ubuntu16]
 uwsgi_ubuntu16
