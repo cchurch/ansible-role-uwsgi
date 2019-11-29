@@ -46,14 +46,14 @@ uwsgi_default_user_group:
     name: uwsgi
     comment: "uWSGI daemon user"
     group: uwsgi
-    home: /run/uwsgi
+    home: /var/run/uwsgi
     shell: /sbin/nologin
     system: true
   yum:
     name: uwsgi
     comment: "uWSGI daemon user"
     group: uwsgi
-    home: /run/uwsgi
+    home: /var/run/uwsgi
     shell: /sbin/nologin
     system: true
 
