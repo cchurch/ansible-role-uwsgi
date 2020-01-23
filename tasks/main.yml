@@ -152,17 +152,6 @@
     dest: "{{ uwsgi_conf_path }}"
     force: "{{ uwsgi_conf_force }}"
   when: uwsgi_conf_template != ''
-
-- name: configure whether uwsgi emperor runs in tyrant mode
-  lineinfile:
-    dest: "{{ uwsgi_conf_path }}"
-    regexp: '^#*?\s*?{{ item.name }}\s*?='
-    line: "{{ item.name }} = {{ item.value }}"
-  with_items:
-    - name: emperor-tyrant
-      value: "{{ uwsgi_emperor_tyrant | bool }}"
-    - name: cap
-      value: "setgid,setuid"
   notify:
     - restart uwsgi
 

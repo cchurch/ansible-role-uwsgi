@@ -25,3 +25,8 @@ gid = {{ uwsgi_user_group.group | default('www-data') }}
 
 # vassals directory
 emperor = {{ uwsgi_vassal_path }}
+
+emperor-tyrant = {{ uwsgi_emperor_tyrant | bool }}
+{% if uwsgi_user_group.name != 'root' and uwsgi_emperor_tyrant | bool %}
+cap = setgid,setuid
+{% endif %}
