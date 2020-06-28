@@ -1,0 +1,8 @@
+---
+
+exclude_paths:
+  - ./tests/roles/cchurch.virtualenv
+  - ./tests/roles/chrismeyersfsu.provision_docker
+
+skip_list:
+  - '602'

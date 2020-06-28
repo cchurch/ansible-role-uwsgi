@@ -1,4 +1,4 @@
-# {{ansible_managed}}
+# {{ ansible_managed }}
 
 [uwsgi]
 
@@ -18,10 +18,10 @@ no-orphans = true
 log-date = true
 
 # user identifier of uWSGI processes
-uid = {{uwsgi_user_group.name|default("www-data")}}
+uid = {{ uwsgi_user_group.name | default('www-data') }}
 
 # group identifier of uWSGI processes
-gid = {{uwsgi_user_group.group|default("www-data")}}
+gid = {{ uwsgi_user_group.group | default('www-data') }}
 
 # vassals directory
-emperor = {{uwsgi_vassal_path}}
+emperor = {{ uwsgi_vassal_path }}

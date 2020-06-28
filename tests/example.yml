@@ -3,15 +3,16 @@
 - hosts: all
   roles:
     - role: cchurch.uwsgi
-      uwsgi_install: pip
-      uwsgi_vassals:
-        - name: example
-          plugin: python
-          chdir: /opt/example/src
-          module: example.wsgi
-          home: /opt/example/env
-          env: DJANGO_SETTINGS_MODULE=example.settings
-          processes: 4
-          socket: 127.0.0.1:8000
-          uid: example
-          gid: example
+      vars:
+        uwsgi_install: pip
+        uwsgi_vassals:
+          - name: example
+            plugin: python
+            chdir: /opt/example/src
+            module: example.wsgi
+            home: /opt/example/env
+            env: DJANGO_SETTINGS_MODULE=example.settings
+            processes: 4
+            socket: 127.0.0.1:8000
+            uid: example
+            gid: example

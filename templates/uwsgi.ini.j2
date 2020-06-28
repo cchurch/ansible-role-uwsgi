@@ -1,9 +1,9 @@
-# {{ansible_managed}}
+# {{ ansible_managed }}
 
 [uwsgi]
-uid = {{uwsgi_user_group.name|default("uwsgi")}}
-gid = {{uwsgi_user_group.group|default("uwsgi")}}
-pidfile = {{uwsgi_user_group.home|default("/run/uwsgi")}}/uwsgi.pid
-emperor = {{uwsgi_vassal_path}}
-stats = {{uwsgi_user_group.home|default("/run/uwsgi")}}/stats.sock
+uid = {{ uwsgi_user_group.name | default('uwsgi') }}
+gid = {{ uwsgi_user_group.group | default('uwsgi') }}
+pidfile = {{ uwsgi_user_group.home | default('/run/uwsgi') }}/uwsgi.pid
+emperor = {{ uwsgi_vassal_path }}
+stats = {{ uwsgi_user_group.home | default('/run/uwsgi') }}/stats.sock
 chmod-socket = 660

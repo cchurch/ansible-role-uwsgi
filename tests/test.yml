@@ -4,55 +4,104 @@
   hosts: containers
   tags: [always]
   tasks:
-    - action: ping
-
-- name: cleanup before test using os package manager
-  include: test_cleanup.yml
-  tags: [pkg, pkg-cleanup]
+    - name: ping
+      ping:
 
 - name: test installation using os package manager
-  hosts: containers
-  gather_facts: false
+  hosts: containers:!centos8
   tags: [pkg]
   vars:
     uwsgi_vassals:
       - name: test
+  pre_tasks:
+    - name: cleanup before test
+      import_tasks: test_cleanup.yml
+      tags: [pkg-cleanup]
   roles:
     - role: cchurch.uwsgi
 
-- name: cleanup before test using pip
-  include: test_cleanup.yml
-  tags: [pip, pip-cleanup]
-
-- name: test installation using pip
+- name: test installation using pip2
   hosts: containers
-  gather_facts: false
-  tags: [pip]
+  tags: [pip, pip2]
   vars:
     uwsgi_install: pip
+    uwsgi_pip_executable: "{{ test_pip2_executable | default('pip2') }}"
     uwsgi_vassals:
       - name: test
+  pre_tasks:
+    - name: cleanup before test
+      import_tasks: test_cleanup.yml
+      tags: [pip2-cleanup]
   roles:
     - role: cchurch.uwsgi
+  post_tasks:
+    - name: check uwsgi python version
+      command: "{{ _uwsgi_bin | quote }} --python-version"
+      register: _uwsgi_python_version
+      changed_when: false
+      failed_when: _uwsgi_python_version.stdout is not version_compare('3.0', '<=')
 
-- name: cleanup before test using virtualenv
-  include: test_cleanup.yml
-  tags: [virtualenv, virtualenv-cleanup]
-
-- name: test installation using virtualenv with custom service name and paths
+- name: test installation using pip3
   hosts: containers
-  gather_facts: false
-  tags: [virtualenv]
+  tags: [pip, pip3]
   vars:
-    virtualenv_path: '/var/lib/uwsgi_venv'
-    uwsgi_service_name: uwsgi_venv
     uwsgi_install: pip
-    uwsgi_version: '2.0.14'
-    uwsgi_virtualenv: '{{virtualenv_path}}'
-    uwsgi_conf_path: '{{virtualenv_path}}/etc/uwsgi.ini'
-    uwsgi_vassal_path: '{{virtualenv_path}}/etc/uwsgi_vassals'
+    uwsgi_pip_executable: "{{ test_pip3_executable | default('pip3') }}"
+    uwsgi_vassals:
+      - name: test3
+  pre_tasks:
+    - name: cleanup before test
+      import_tasks: test_cleanup.yml
+      tags: [pip3-cleanup]
+  roles:
+    - role: cchurch.uwsgi
+  post_tasks:
+    - name: check uwsgi python version
+      command: "{{ _uwsgi_bin | quote }} --python-version"
+      register: _uwsgi_python_version
+      changed_when: false
+      failed_when: _uwsgi_python_version.stdout is not version_compare('3.0', '>')
+
+- name: test installation in python2 virtualenv with custom service name and paths
+  hosts: containers
+  tags: [virtualenv, virtualenv2]
+  vars:
+    virtualenv_path: /var/lib/uwsgi_venv2
+    virtualenv_python: "{{ test_virtualenv_python2 | default('python2') }}"
+    uwsgi_service_name: uwsgi_venv2
+    uwsgi_install: pip
+    uwsgi_version: "2.0.18"
+    uwsgi_virtualenv: "{{ virtualenv_path }}"
+    uwsgi_conf_path: "{{ virtualenv_path }}/etc/uwsgi.ini"
+    uwsgi_vassal_path: "{{ virtualenv_path }}/etc/uwsgi_vassals"
     uwsgi_vassals:
       - name: test
+  pre_tasks:
+    - name: cleanup before test
+      import_tasks: test_cleanup.yml
+      tags: [virtualenv2-cleanup]
+  roles:
+    - role: cchurch.virtualenv
+    - role: cchurch.uwsgi
+
+- name: test installation in python3 virtualenv with custom service name and paths
+  hosts: containers
+  tags: [virtualenv, virtualenv3]
+  vars:
+    virtualenv_path: /var/lib/uwsgi_venv3
+    virtualenv_python:  "{{ test_virtualenv_python3 | default('python3') }}"
+    uwsgi_service_name: uwsgi_venv3
+    uwsgi_install: pip
+    uwsgi_version: "2.0.18"
+    uwsgi_virtualenv: "{{ virtualenv_path }}"
+    uwsgi_conf_path: "{{ virtualenv_path }}/etc/uwsgi.ini"
+    uwsgi_vassal_path: "{{ virtualenv_path }}/etc/uwsgi_vassals"
+    uwsgi_vassals:
+      - name: test
+  pre_tasks:
+    - name: cleanup before test
+      import_tasks: test_cleanup.yml
+      tags: [virtualenv3-cleanup]
   roles:
     - role: cchurch.virtualenv
     - role: cchurch.uwsgi
