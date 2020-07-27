@@ -6,7 +6,6 @@
     state: stopped
   with_items:
     - "{{ uwsgi_default_service_names[ansible_pkg_mgr] }}"
-    - uwsgi_venv2
     - uwsgi_venv3
   ignore_errors: true
 
@@ -22,13 +21,6 @@
     state: absent
     purge: "{{ (ansible_pkg_mgr == 'apt') | ternary(true, omit) }}"
   when: inventory_hostname != 'uwsgi_ubuntu14'
-
-- name: remove uwsgi pip2 packages
-  pip:
-    name: "{{ uwsgi_default_pip_packages }}"
-    state: absent
-    executable: "{{ test_pip2_executable | default('pip2') }}"
-  ignore_errors: true
 
 - name: remove uwsgi pip3 packages
   pip:
@@ -46,8 +38,6 @@
     - "{{ uwsgi_default_vassal_paths[ansible_pkg_mgr] }}"
     - "/etc/uwsgi-emperor/"
     - "/etc/init/{{ uwsgi_default_service_names[ansible_pkg_mgr] }}.conf"
-    - "/etc/init/uwsgi_venv2.conf"
-    - "/var/lib/uwsgi_venv2"
     - "/etc/init/uwsgi_venv3.conf"
     - "/var/lib/uwsgi_venv3"
     - "/usr/bin/uwsgi"

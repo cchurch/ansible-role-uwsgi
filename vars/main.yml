@@ -4,7 +4,7 @@ uwsgi_default_os_packages:
   pkg:
     apt:
       - uwsgi-emperor
-      - uwsgi-plugin-python
+      - "{{ (ansible_distribution_major_version is version('20', '>=')) | ternary('uwsgi-plugin-python3', 'uwsgi-plugin-python') }}"
     dnf: []  # No uWSGI packages available on EL 8 :-(.
     yum:
       - uwsgi

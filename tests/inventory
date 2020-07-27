@@ -11,6 +11,7 @@ uwsgi_centos7 image="flyingfred0/ansible-role-testing:centos7-systemd"
 uwsgi_centos8 image="flyingfred0/ansible-role-testing:centos8-systemd"
 uwsgi_ubuntu16 image="ubuntu:xenial"
 uwsgi_ubuntu18 image="flyingfred0/ansible-role-testing:ubuntu18-systemd"
+uwsgi_ubuntu20 image="ubuntu:focal"
 
 [containers:vars]
 ansible_connection=docker
@@ -46,9 +47,17 @@ ansible_python_interpreter=/usr/libexec/platform-python
 [ubuntu:children]
 ubuntu16
 ubuntu18
+ubuntu20
 
 [ubuntu16]
 uwsgi_ubuntu16
 
 [ubuntu18]
 uwsgi_ubuntu18
+
+[ubuntu20]
+uwsgi_ubuntu20
+
+[ubuntu20:vars]
+python_minimal_package=python3-minimal
+python_pip_package=python3-pip
