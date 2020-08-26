@@ -2,5 +2,11 @@
 
 [uwsgi]
 {% for k,v in item.items() %}
+{% if v is iterable and v is not string %}
+{% for list_entry in v %}
+{{ k }} = {{ list_entry }}
+{% endfor %}
+{% else %}
 {{ k }} = {{ v }}
+{% endif %}
 {% endfor %}
