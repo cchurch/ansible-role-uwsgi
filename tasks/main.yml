@@ -185,6 +185,17 @@
     state: absent
   with_items: "{{ uwsgi_vassals_to_remove | default([]) }}"
 
+- name: update uwsgi selinux fcontext
+  sefcontext:
+    target: "{{ _uwsgi_bin }}"
+    setype: bin_t
+    state: present
+  when: ansible_selinux | default(false)
+
+- name: apply selinux fcontext
+  command: "restorecon -irv {{ _uwsgi_bin }}"
+  when: ansible_selinux | default(false)
+
 - name: start and enable the uwsgi service
   service:
     name: "{{ _uwsgi_service_name }}"
