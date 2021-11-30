@@ -44,3 +44,5 @@ uwsgi_vassals: []
 #   key: value
 #   ...
 uwsgi_vassals_to_remove: []
+
+uwsgi_selinux: false

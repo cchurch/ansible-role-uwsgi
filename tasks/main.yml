@@ -190,11 +190,11 @@
     target: "{{ _uwsgi_bin }}"
     setype: bin_t
     state: present
-  when: ansible_selinux | default(false)
+  when: ansible_selinux | default(false) and uwsgi_selinux | default(false)
 
 - name: apply selinux fcontext
-  command: "restorecon -irv {{ _uwsgi_bin }}"
-  when: ansible_selinux | default(false)
+  command: "/usr/sbin/restorecon -irv {{ _uwsgi_bin }}"
+  when: ansible_selinux | default(false) and uwsgi_selinux | default(false)
 
 - name: start and enable the uwsgi service
   service:
